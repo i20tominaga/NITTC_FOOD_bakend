@@ -12,6 +12,6 @@ logs/
 *.log
 npm-debug.log*
 
-udon-9d359-firebase-adminsdk-ydghb-57a2d17da7.json
+seriviceAccountKey.json
 
 .firebaserc
