@@ -12,6 +12,6 @@ logs/
 *.log
 npm-debug.log*
 # 秘密鍵のjsonファイル
-seriviceAccountKey.json
+serviceAccountKey.json
 
 .firebaserc
