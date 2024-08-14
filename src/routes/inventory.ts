@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createInventoryItem, getInventoryItem, updateInventoryItem, deleteInventoryItem } from "../firestoreService";
+import { createInventoryItem, getInventoryItem, updateInventoryItem, deleteInventoryItem } from "../services/firestoreService";
 import { InventoryItem } from "../types";
 
 const router = Router();

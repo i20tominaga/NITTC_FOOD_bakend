@@ -1,6 +1,6 @@
 // firestoreService.ts
-import { db } from './config/firebaseConfig';
-import { User, Ticket, InventoryItem, Order, Notification } from './types';
+import { db } from '../config/firebaseConfig';
+import { User, Ticket, InventoryItem, Order, Notification } from '../types';
 import { CollectionReference, DocumentReference, DocumentSnapshot, SetOptions, UpdateData } from 'firebase-admin/firestore';
 
 // Usersコレクションの操作
