@@ -1,3 +1,5 @@
+// src/config/firebaseConfig.ts
+
 import { initializeApp, applicationDefault, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';

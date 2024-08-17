@@ -4,6 +4,7 @@ import { Order } from '../types'; // Order型
 import { Timestamp } from 'firebase-admin/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../config/firebaseConfig';
+import { sendNotification } from '../services/notificationService';
 
 const router = Router();
 
@@ -70,5 +71,47 @@ router.get('/getAll', async (req, res) => {
         res.status(500).json({ error: '注文の取得に失敗しました' });
     }
 });
+
+//　注文の完了の通知
+router.post('/complete/:orderId', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        // Firestoreから注文を取得
+        const orderRef = db.collection('Orders').doc(orderId);
+        const orderSnapshot = await orderRef.get();
+
+        if (!orderSnapshot.exists) {
+            return res.status(404).json({ error: '注文が見つかりません' });
+        }
+
+        const order = orderSnapshot.data() as Order;
+
+        // ユーザーのFCMトークンを取得
+        const tokenSnapshot = await db.collection('UserTokens').doc(order.userId).get();
+        const tokenData = tokenSnapshot.data();
+
+        if (!tokenData || !tokenData.token) {
+            return res.status(404).json({ error: 'ユーザーのトークンが見つかりません' });
+        }
+
+        const token = tokenData.token;
+
+        // 注文のステータスを「完了」に更新
+        await orderRef.update({
+            status: '完了',
+            updatedAt: Timestamp.now()
+        });
+
+        // 通知を送信
+        await sendNotification(token, '注文が完了しました', `注文ID: ${orderId} の品が完成しました`);
+
+        res.status(200).json({ message: '注文が完了しました', orderId });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '注文の完了処理に失敗しました' });
+    }
+});
+
 
 export default router;

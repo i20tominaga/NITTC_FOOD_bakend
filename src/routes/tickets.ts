@@ -64,4 +64,42 @@ router.delete('/cancel/:ticketId', async (req, res) => {
     }
 });
 
+// 全ての整理券発行状況を取得
+router.get('/getAll', async (req, res) => {
+    try {
+        const ticketsRef = db.collection('Tickets');
+        const snapshot = await ticketsRef.get();
+
+        if (snapshot.empty) {
+            return res.status(404).json({ message: 'No tickets found' });
+        }
+
+        const tickets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        res.status(200).json(tickets);
+    } catch (error) {
+        console.error('Error fetching tickets:', error);
+        res.status(500).json({ error: 'Failed to fetch tickets' });
+    }
+});
+
+//　整理券の発行状況を更新
+router.post('/update', async (req, res) => {
+    const { ticketId, newDateTime } = req.body;
+
+    try {
+        const ticketRef = db.collection('Tickets').doc(ticketId);
+        const doc = await ticketRef.get();
+
+        if (!doc.exists) {
+            return res.status(404).json({ message: 'Ticket not found' });
+        }
+
+        await ticketRef.update({ dateTime: newDateTime });
+        res.status(200).json({ message: 'Ticket updated successfully' });
+    } catch (error) {
+        console.error('Error updating ticket:', error);
+        res.status(500).json({ error: 'Failed to update ticket' });
+    }
+});
+
 export default router;
