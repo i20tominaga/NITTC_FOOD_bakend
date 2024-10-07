@@ -1,3 +1,4 @@
+// orders.ts
 import { Router } from 'express';
 import { createOrder, getOrder, updateOrder, deleteOrder } from '../services/firestoreService'; // Firestoreの操作関数
 import { Order } from '../types'; // Order型
@@ -12,20 +13,44 @@ function generateUniqueOrderId(): string {
     return uuidv4();
 }
 
+// チケットナンバーを取得する関数
+async function getNextTicketNumber(): Promise<number> {
+    const ticketNumberRef = db.collection('TicketNumbers').doc('current');
+    const ticketNumberDoc = await ticketNumberRef.get();
+
+    let nextTicketNumber = 1; // デフォルトは1
+
+    if (ticketNumberDoc.exists) {
+        const currentTicketNumber = ticketNumberDoc.data()?.current || 0;
+        nextTicketNumber = currentTicketNumber + 1;
+    }
+
+    // チケットナンバーを更新
+    await ticketNumberRef.set({ current: nextTicketNumber });
+
+    return nextTicketNumber;
+}
+
 // 注文の作成
 router.post('/create', async (req, res) => {
     try {
-        const { userId, ticketId, items, totalPrice, status } = req.body;
+        const { userId, items, totalPrice } = req.body;
+
+        // 必須項目のチェック
+        if (!userId || !items || !totalPrice) {
+            return res.status(400).json({ error: 'すべてのフィールドは必須です' });
+        }
 
         const orderId = generateUniqueOrderId(); // 一意の注文IDを生成
+        const ticketNumber = await getNextTicketNumber(); // 次のチケットナンバーを取得
 
         const newOrder: Order = {
             orderId,
             userId,
-            ticketId,
+            ticketNumber: ticketNumber.toString(), // チケットナンバーを文字列に変換
             items,
             totalPrice,
-            status,
+            status: 'pending', // 初期状態を「pending」に設定
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
         };
@@ -33,7 +58,7 @@ router.post('/create', async (req, res) => {
         await createOrder(newOrder);
         res.status(201).json({ message: '注文が作成されました', orderId });
     } catch (error) {
-        console.error(error);
+        console.error('注文の作成エラー:', error);
         res.status(500).json({ error: '注文の作成に失敗しました' });
     }
 });
@@ -72,7 +97,7 @@ router.get('/getAll', async (req, res) => {
     }
 });
 
-//　注文の完了の通知
+// 注文の完了の通知
 router.post('/complete/:orderId', async (req, res) => {
     try {
         const { orderId } = req.params;
@@ -112,6 +137,5 @@ router.post('/complete/:orderId', async (req, res) => {
         res.status(500).json({ error: '注文の完了処理に失敗しました' });
     }
 });
-
 
 export default router;

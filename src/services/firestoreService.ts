@@ -1,6 +1,5 @@
-// firestoreService.ts
 import { db } from '../config/firebaseConfig';
-import { User, Ticket, InventoryItem, Order, Notification } from '../types';
+import { User, InventoryItem, Order, Notification } from '../types';
 import { CollectionReference, DocumentReference, DocumentSnapshot, SetOptions, UpdateData } from 'firebase-admin/firestore';
 
 // Usersコレクションの操作
@@ -34,41 +33,6 @@ export async function updateUser(user: User) {
 export async function deleteUser(userId: string) {
     const userRef: DocumentReference = db.collection('Users').doc(userId);
     await userRef.delete();
-}
-
-//　Ticketsコレクションの操作
-export async function createTicket(ticket: Ticket) {
-    const ticketRef: DocumentReference = db.collection('Tickets').doc(ticket.ticketId);
-    await ticketRef.set(ticket);
-}
-
-export async function getTicket(ticketId: string): Promise<Ticket | null> {
-    const ticketRef: DocumentReference = db.collection('Tickets').doc(ticketId);
-    const ticketSnap: DocumentSnapshot = await ticketRef.get();
-    return ticketSnap.exists ? (ticketSnap.data() as Ticket) : null;
-}
-
-export async function updateTicket(ticket: Ticket) {
-    const ticketRef: DocumentReference = db.collection('Tickets').doc(ticket.ticketId);
-
-    // Ticket オブジェクトからプロパティを取得し、適切な形式に変換
-    const ticketData: { [key: string]: any } = {
-        ticketId: ticket.ticketId,
-        userId: ticket.userId,
-        date: ticket.date,
-        timeSlot: ticket.timeSlot,
-        status: ticket.status,
-        qrCodeUrl: ticket.qrCodeUrl,
-        createdAt: ticket.createdAt,
-        updatedAt: ticket.updatedAt
-    };
-
-    await ticketRef.update(ticketData);
-}
-
-export async function deleteTicket(ticketId: string) {
-    const ticketRef: DocumentReference = db.collection('Tickets').doc(ticketId);
-    await ticketRef.delete();
 }
 
 // Inventoryコレクションの操作
@@ -122,7 +86,7 @@ export async function updateOrder(order: Order) {
     const orderData: { [key: string]: any } = {
         orderId: order.orderId,
         userId: order.userId,
-        ticketId: order.ticketId,
+        ticketNumber: order.ticketNumber, // ticketIdをticketNumberに変更
         items: order.items,
         totalPrice: order.totalPrice,
         status: order.status,

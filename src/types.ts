@@ -10,18 +10,6 @@ export interface User {
     updatedAt: Timestamp; // 最終更新日時
 }
 
-// Ticketsコレクションのインターフェース
-export interface Ticket {
-    ticketId: string;      // 整理券の一意なID
-    userId: string;        // 整理券を予約したユーザーID
-    date: string;          // 予約日（YYYY-MM-DD形式）
-    timeSlot: string;      // 予約時間帯（例: "12:00-12:30"）
-    status: 'active' | 'canceled'; // 整理券の状態（例: "active", "canceled"）
-    qrCodeUrl: string;     // QRコードのURL
-    createdAt: Timestamp; // 予約作成日時
-    updatedAt: Timestamp; // 最終更新日時
-}
-
 // Inventoryコレクションのインターフェース
 export interface InventoryItem {
     itemId: string;        // 商品の一意なID
@@ -35,7 +23,7 @@ export interface InventoryItem {
 export interface Order {
     orderId: string;       // 注文の一意なID
     userId: string;        // 注文を行ったユーザーID
-    ticketId: string;      // 関連する整理券のID
+    ticketNumber: string;   // 整理券番号
     items: {
         itemId: string;      // 注文した商品のID
         itemName: string;    // 商品名
