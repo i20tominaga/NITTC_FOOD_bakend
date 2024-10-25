@@ -15,18 +15,22 @@ function generateUniqueOrderId(): string {
 
 // チケットナンバーを取得する関数
 async function getNextTicketNumber(): Promise<number> {
-    const ticketNumberRef = db.collection('TicketNumbers').doc('current');
-    const ticketNumberDoc = await ticketNumberRef.get();
+    // 現在の全ての注文を取得
+    const ordersSnapshot = await db.collection('Orders').get();
 
+    // 現在使用されているチケットナンバーのセットを作成
+    const usedTicketNumbers = new Set<number>();
+
+    ordersSnapshot.forEach(doc => {
+        const order = doc.data() as Order;
+        usedTicketNumbers.add(Number(order.ticketNumber)); // 文字列を数値に変換
+    });
+
+    // 未使用の最も若いチケットナンバーを探す
     let nextTicketNumber = 1; // デフォルトは1
-
-    if (ticketNumberDoc.exists) {
-        const currentTicketNumber = ticketNumberDoc.data()?.current || 0;
-        nextTicketNumber = currentTicketNumber + 1;
+    while (usedTicketNumbers.has(nextTicketNumber)) {
+        nextTicketNumber++;
     }
-
-    // チケットナンバーを更新
-    await ticketNumberRef.set({ current: nextTicketNumber });
 
     return nextTicketNumber;
 }

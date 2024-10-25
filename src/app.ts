@@ -9,7 +9,15 @@ import cors from 'cors';
 
 const app = express();
 app.use(bodyParser.json());
-app.use(cors());
+
+// CORSの設定
+const corsOptions = {
+    origin: 'http://localhost:3001', // フロントエンドのURL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // CookieやAuthorizationヘッダーを許可する場合はtrueにする
+};
+
+app.use(cors(corsOptions));
 
 // 各ルートを登録
 app.use('/api/auth', authRoutes);
