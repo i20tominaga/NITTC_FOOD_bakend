@@ -2,21 +2,13 @@ import { initializeApp, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
-// 環境変数からサービスアカウントキーを取得
-const serviceAccountKey = process.env.SERVICE_ACCOUNT_KEY;
-
-if (!serviceAccountKey) {
+if (!process.env.SERVICE_ACCOUNT_KEY) {
     console.error("Error: SERVICE_ACCOUNT_KEY is not defined in environment variables");
-    process.exit(1); // エラーメッセージを表示してアプリを終了
-}
-
-let serviceAccount;
-try {
-    serviceAccount = JSON.parse(serviceAccountKey);
-} catch (error) {
-    console.error("Failed to parse SERVICE_ACCOUNT_KEY:", error);
     process.exit(1);
 }
+
+// サービスアカウントキーを環境変数から読み込む
+const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_KEY);
 
 const app = initializeApp({
     credential: cert(serviceAccount),
